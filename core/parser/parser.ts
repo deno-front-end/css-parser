@@ -1,11 +1,8 @@
-var DEBUG = false; // `true` to print debugging info.
-var TIMER = false; // `true` to time calls to `parse()` and print the results.
-
-import dbg from "../debug.js";
+import dbg from "../../debug.js";
 let debug = dbg("parse");
 
 import { lex } from "../lexer/lexer.ts";
-import { AST, Token } from "../types.ts";
+import { AST, Token } from "../../types.ts";
 
 var _comments: boolean; // Whether comments are allowed.
 var _depth: number; // Current block nesting depth.
@@ -36,14 +33,14 @@ export function parse(css: string | any[], options: any): AST {
   var rules = [];
   var token;
 
-  TIMER && (start = Date.now());
+  start = Date.now();
 
   while ((token = next())) {
     rule = parseToken(token);
     rule && rules.push(rule);
   }
 
-  TIMER && debug("ran in", (Date.now() - start) + "ms");
+  debug("ran in", (Date.now() - start) + "ms");
 
   return {
     type: "stylesheet",
@@ -95,7 +92,7 @@ function astNode(token: Token, overrd?: any): Token {
     };
   }
 
-  DEBUG && debug("astNode:", JSON.stringify(node, null, 2));
+  debug("astNode:", JSON.stringify(node, null, 2));
 
   return node;
 }
@@ -107,7 +104,7 @@ function astNode(token: Token, overrd?: any): Token {
  */
 function next() {
   var token = _tokens.shift();
-  DEBUG && debug("next:", JSON.stringify(token, null, 2));
+  debug("next:", JSON.stringify(token, null, 2));
   return token;
 }
 
@@ -249,7 +246,7 @@ function parseToken(token: any): any {
       return parseAtGroup(token);
   }
 
-  DEBUG && debug("parseToken: unexpected token:", JSON.stringify(token));
+  debug("parseToken: unexpected token:", JSON.stringify(token));
 }
 
 // -- Parse Helper Functions ---------------------------------------------------

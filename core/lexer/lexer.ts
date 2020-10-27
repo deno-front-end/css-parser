@@ -1,8 +1,5 @@
-var DEBUG = false; // `true` to print debugging info.
-var TIMER = false; // `true` to time calls to `lex()` and print the results.
-
-import dbg from "../debug.js";
-import { Token } from "../types.ts";
+import dbg from "../../debug.js";
+import { Token } from "../../types.ts";
 
 let debug = dbg("lex");
 
@@ -187,7 +184,7 @@ export function lex(css: string): Token[] {
       col: column,
     };
 
-    DEBUG && debug("addToken:", JSON.stringify(token, null, 2));
+    debug("addToken:", JSON.stringify(token, null, 2));
 
     tokens.push(token);
 
@@ -222,10 +219,10 @@ export function lex(css: string): Token[] {
   since the total number of cases is very low.
   */
 
-  TIMER && (start = Date.now());
+  start = Date.now();
 
   while (ch = getCh()) {
-    DEBUG && debug(ch, getState());
+    debug(ch, getState());
 
     // column += 1;
 
@@ -686,7 +683,7 @@ export function lex(css: string): Token[] {
     }
   }
 
-  TIMER && debug("ran in", (Date.now() - start) + "ms");
+  debug("ran in", (Date.now() - start) + "ms");
 
   return tokens;
 }
