@@ -1,18 +1,18 @@
 var DEBUG = false; // `true` to print debugging info.
 var TIMER = false; // `true` to time calls to `parse()` and print the results.
 
-import dbg from './debug.js'
-let debug = dbg('parse');
+import dbg from "../debug.js";
+let debug = dbg("parse");
 
-import lex from './lexer.ts';
-import { Token, AST } from "./types.ts";
+import lex from "../lexer/lexer.ts";
+import { AST, Token } from "../types.ts";
 
 export default parse;
 
-var _comments: boolean;   // Whether comments are allowed.
-var _depth: number;      // Current block nesting depth.
-var _position: any;   // Whether to include line/column position.
-var _tokens: any[];     // Array of lexical tokens.
+var _comments: boolean; // Whether comments are allowed.
+var _depth: number; // Current block nesting depth.
+var _position: any; // Whether to include line/column position.
+var _tokens: Token[]; // Array of lexical tokens.
 
 /**
  * Convert a CSS string or array of lexical tokens into a `stringify`-able AST.
@@ -45,13 +45,13 @@ function parse(css: string | any[], options: any): AST {
     rule && rules.push(rule);
   }
 
-  TIMER && debug('ran in', (Date.now() - start) + 'ms');
+  TIMER && debug("ran in", (Date.now() - start) + "ms");
 
   return {
     type: "stylesheet",
     stylesheet: {
-      rules: rules
-    }
+      rules: rules,
+    },
   };
 }
 
@@ -84,7 +84,7 @@ function astNode(token: Token, overrd?: any): Token {
   let key;
   for (let i = 0; i < keys.length; ++i) {
     key = keys[i];
-    let n = node as Record<string, any>
+    let n = node as Record<string, any>;
     if (!n[key]) {
       n[key] = override[key];
     }
@@ -93,11 +93,11 @@ function astNode(token: Token, overrd?: any): Token {
   if (_position) {
     node.position = {
       start: token.start,
-      end: token.end
+      end: token.end,
     };
   }
 
-  DEBUG && debug('astNode:', JSON.stringify(node, null, 2));
+  DEBUG && debug("astNode:", JSON.stringify(node, null, 2));
 
   return node;
 }
@@ -109,7 +109,7 @@ function astNode(token: Token, overrd?: any): Token {
  */
 function next() {
   var token = _tokens.shift();
-  DEBUG && debug('next:', JSON.stringify(token, null, 2));
+  DEBUG && debug("next:", JSON.stringify(token, null, 2));
   return token;
 }
 
@@ -129,19 +129,19 @@ function parseAtGroup(token: Token): any {
   var overrides: any = {};
 
   switch (token.type) {
-  case 'font-face':
-  case 'viewport' :
-    overrides.declarations = parseDeclarations();
-    break;
+    case "font-face":
+    case "viewport":
+      overrides.declarations = parseDeclarations();
+      break;
 
-  case 'page':
-    overrides.prefix = token.prefix;
-    overrides.declarations = parseDeclarations();
-    break;
+    case "page":
+      overrides.prefix = token.prefix;
+      overrides.declarations = parseDeclarations();
+      break;
 
-  default:
-    overrides.prefix = token.prefix;
-    overrides.rules = parseRules();
+    default:
+      overrides.prefix = token.prefix;
+      overrides.rules = parseRules();
   }
 
   return astNode(token, overrides);
@@ -174,7 +174,7 @@ function parseCharset(token: any): any {
  * @returns {Object} comment node
  */
 function parseComment(token: any): any {
-  return astNode(token, {text: token.text});
+  return astNode(token, { text: token.text });
 }
 
 function parseNamespace(token: any): any {
@@ -202,10 +202,10 @@ function parseSelector(token: any): any {
   }
 
   return astNode(token, {
-    type: 'rule',
-    selectors: token.text.split(',').map(trim),
+    type: "rule",
+    selectors: token.text.split(",").map(trim),
     // parseDeclarations(token)
-    declarations: parseDeclarations()
+    declarations: parseDeclarations(),
   });
 }
 
@@ -216,31 +216,42 @@ function parseSelector(token: any): any {
  */
 function parseToken(token: any): any {
   switch (token.type) {
-  // Cases are listed in roughly descending order of probability.
-  case 'property': return parseProperty(token);
+    // Cases are listed in roughly descending order of probability.
+    case "property":
+      return parseProperty(token);
 
-  case 'selector': return parseSelector(token);
+    case "selector":
+      return parseSelector(token);
 
-  case 'at-group-end': _depth = _depth - 1; return;
+    case "at-group-end":
+      _depth = _depth - 1;
+      return;
 
-  case 'media'     :
-  case 'keyframes' :return parseAtGroup(token);
+    case "media":
+    case "keyframes":
+      return parseAtGroup(token);
 
-  case 'comment': if (_comments) { return parseComment(token); } break;
+    case "comment":
+      if (_comments) return parseComment(token);
+      break;
 
-  case 'charset': return parseCharset(token);
-  case 'import': return parseAtImport(token);
+    case "charset":
+      return parseCharset(token);
+    case "import":
+      return parseAtImport(token);
 
-  case 'namespace': return parseNamespace(token);
+    case "namespace":
+      return parseNamespace(token);
 
-  case 'font-face':
-  case 'supports' :
-  case 'viewport' :
-  case 'document' :
-  case 'page'     : return parseAtGroup(token);
+    case "font-face":
+    case "supports":
+    case "viewport":
+    case "document":
+    case "page":
+      return parseAtGroup(token);
   }
 
-  DEBUG && debug('parseToken: unexpected token:', JSON.stringify(token));
+  DEBUG && debug("parseToken: unexpected token:", JSON.stringify(token));
 }
 
 // -- Parse Helper Functions ---------------------------------------------------
@@ -266,7 +277,7 @@ function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
   }
 
   // Place an unused non-`end` lexical token back onto the stack.
-  if (token && token.type !== 'end') {
+  if (token && token.type !== "end") {
     _tokens.unshift(token);
   }
 
@@ -280,7 +291,7 @@ function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
  */
 function parseDeclarations(): any {
   return parseTokensWhile(function (token) {
-    return (token.type === 'property' || token.type === 'comment');
+    return (token.type === "property" || token.type === "comment");
   });
 }
 
@@ -290,5 +301,7 @@ function parseDeclarations(): any {
  * @returns {Array} rule nodes
  */
 function parseRules(): any {
-  return parseTokensWhile(function () { return _depth; });
+  return parseTokensWhile(function () {
+    return _depth;
+  });
 }
