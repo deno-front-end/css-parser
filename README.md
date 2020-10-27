@@ -1,2 +1,2 @@
-# css-parser
-CSS3 Parser implementation for Deno
+# `css_parser`
+CSS Lexer & Parser implementation for Deno

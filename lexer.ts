@@ -13,8 +13,8 @@ export default lex;
  * @param {String} css CSS
  * @returns {Array} lexical tokens
  */
-function lex(css) {
-  var start; // Debug timer start.
+function lex(css: string) {
+  var start = 0; // Debug timer start.
 
   var buffer = '';      // Character accumulator
   var ch;               // Current character
@@ -24,11 +24,11 @@ function lex(css) {
   var line = 1;         // Current source line number
   var state = 'before-selector'; // Current state
   var stack = [state];  // State stack
-  var token = {};       // Current token
-  var tokens = [];      // Token accumulator
+  var token: any = {};       // Current token
+  var tokens: any[] = [];      // Token accumulator
 
   // Supported @-rules, in roughly descending order of usage probability.
-  var atRules = [
+  var atRules: any = [
     'media',
     'keyframes',
     { name: '-webkit-keyframes', type: 'keyframes', prefix: '-webkit-' },
@@ -65,7 +65,7 @@ function lex(css) {
    * @param {Number} [index=0] Index to return.
    * @returns {String} state
    */
-  function getState(index) {
+  function getState(index?: number): string {
     return index ? stack[stack.length - 1 - index] : state;
   }
 
@@ -76,7 +76,7 @@ function lex(css) {
    * @param {String} str The string to look for.
    * @returns {Boolean} Whether the string was found.
    */
-  function isNextString(str) {
+  function isNextString(str: string): boolean {
     var start = cursor + 1;
     return (str === css.slice(start, start + str.length));
   }
@@ -88,7 +88,7 @@ function lex(css) {
    * @param {String} str The substring to look for.
    * @returns {Number|false} The position, or `false` if not found.
    */
-  function find(str) {
+  function find(str: string): number | boolean {
     var pos = css.slice(cursor).indexOf(str);
 
     return pos > 0 ? pos : false;
@@ -100,7 +100,7 @@ function lex(css) {
    * @param {String} ch Character.
    * @returns {Boolean} Whether the character is next.
    */
-  function isNextChar(ch) {
+  function isNextChar(ch: string): boolean {
     return ch === peek(1);
   }
 
@@ -111,7 +111,7 @@ function lex(css) {
    * @param {Number} [offset=1] Cursor offset.
    * @returns {String} Character.
    */
-  function peek(offset) {
+  function peek(offset: number): string {
     return css[cursor + (offset || 1)];
   }
 
@@ -120,7 +120,7 @@ function lex(css) {
    *
    * @returns {String} The removed state.
    */
-  function popState() {
+  function popState(): string | undefined {
     var removed = stack.pop();
     state = stack[stack.length - 1];
 
@@ -133,7 +133,7 @@ function lex(css) {
    * @param {String} newState The new state.
    * @returns {Number} The new stack length.
    */
-  function pushState(newState) {
+  function pushState(newState: string): number {
     state = newState;
     stack.push(state);
 
@@ -146,7 +146,7 @@ function lex(css) {
    * @param {String} newState The new state.
    * @returns {String} The replaced state.
    */
-  function replaceState(newState) {
+  function replaceState(newState: string): string {
     var previousState = state;
     stack[stack.length - 1] = state = newState;
 
@@ -159,7 +159,7 @@ function lex(css) {
    *
    * @param {Number} [n=1] Number of characters to skip.
    */
-  function skip(n) {
+  function skip(n?: number) {
     if ((n || 1) == 1) {
       if (css[cursor] == '\n') {
         line++;
@@ -169,13 +169,13 @@ function lex(css) {
       }
       cursor++;
     } else {
-      var skipStr = css.slice(cursor, cursor + n).split('\n');
+      var skipStr = css.slice(cursor, cursor + (n || 0)).split('\n');
       if (skipStr.length > 1) {
         line += skipStr.length - 1;
         column = 1;
       }
       column += skipStr[skipStr.length - 1].length;
-      cursor = cursor + n;
+      cursor = cursor + (n || 0);
     }
   }
 
@@ -201,7 +201,7 @@ function lex(css) {
    *
    * @param {String} type Token type.
    */
-  function initializeToken(type) {
+  function initializeToken(type: any) {
     token = {
       type: type,
       start: {
@@ -530,7 +530,7 @@ function lex(css) {
           // difficult to represent in the AST.
           var pos = find('*/');
 
-          if (pos) {
+          if (pos && typeof pos !== "boolean") {
             skip(pos + 1);
           }
         } else {
