@@ -4,10 +4,8 @@ var TIMER = false; // `true` to time calls to `parse()` and print the results.
 import dbg from "../debug.js";
 let debug = dbg("parse");
 
-import lex from "../lexer/lexer.ts";
+import { lex } from "../lexer/lexer.ts";
 import { AST, Token } from "../types.ts";
-
-export default parse;
 
 var _comments: boolean; // Whether comments are allowed.
 var _depth: number; // Current block nesting depth.
@@ -22,7 +20,7 @@ var _tokens: Token[]; // Array of lexical tokens.
  * @param {Boolean} [options.comments=false] allow comment nodes in the AST
  * @returns {Object} `stringify`-able AST
  */
-function parse(css: string | any[], options: any): AST {
+export function parse(css: string | any[], options: any): AST {
   var start = 0; // Debug timer start.
 
   options || (options = {});

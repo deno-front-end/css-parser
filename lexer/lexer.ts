@@ -6,15 +6,13 @@ import { Token } from "../types.ts";
 
 let debug = dbg("lex");
 
-export default lex;
-
 /**
  * Convert a CSS string into an array of lexical tokens.
  *
  * @param {String} css CSS
  * @returns {Array} lexical tokens
  */
-function lex(css: string): Token[] {
+export function lex(css: string): Token[] {
   var start = 0; // Debug timer start.
 
   var buffer = ""; // Character accumulator
