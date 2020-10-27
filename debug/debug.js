@@ -1,5 +1,5 @@
 function debug(label) {
-    return _debug.bind(null, label);
+  return _debug.bind(null, label);
 }
 
 function _debug(label) {

@@ -1,5 +1,5 @@
-import dbg from "../../debug.js";
-import { Token } from "../../types.ts";
+import dbg from "../../debug/debug.js";
+import { Token } from "../../ast/mod.ts";
 
 let debug = dbg("lex");
 
