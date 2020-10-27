@@ -5,6 +5,7 @@ export interface Rule {
   text?: string;
   selectors: string[];
   declarations: Decl[];
+  prefix?: string;
   position?: Position;
 }
 
