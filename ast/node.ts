@@ -1,7 +1,11 @@
+import { Position } from "./token.ts";
+
 export interface Rule {
-  type: "rule";
+  type: string;
+  text?: string;
   selectors: string[];
   declarations: Decl[];
+  position?: Position;
 }
 
 export interface Decl {
