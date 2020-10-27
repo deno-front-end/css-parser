@@ -1,0 +1,3 @@
+# ignore the testing fixture sources
+*.js linguist-vendored
+*.css linguist-vendored
