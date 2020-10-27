@@ -5,14 +5,14 @@ var TIMER = false; // `true` to time calls to `parse()` and print the results.
 import dbg from './debug.js'
 let debug = dbg('parse');
 
-import lex from './lexer.js';
+import lex from './lexer.ts';
 
 export default parse;
 
-var _comments;   // Whether comments are allowed.
-var _depth;      // Current block nesting depth.
-var _position;   // Whether to include line/column position.
-var _tokens;     // Array of lexical tokens.
+var _comments: boolean;   // Whether comments are allowed.
+var _depth: number;      // Current block nesting depth.
+var _position: any;   // Whether to include line/column position.
+var _tokens: any[];     // Array of lexical tokens.
 
 /**
  * Convert a CSS string or array of lexical tokens into a `stringify`-able AST.
@@ -22,8 +22,8 @@ var _tokens;     // Array of lexical tokens.
  * @param {Boolean} [options.comments=false] allow comment nodes in the AST
  * @returns {Object} `stringify`-able AST
  */
-function parse(css, options) {
-  var start; // Debug timer start.
+function parse(css: string | any[], options: any) {
+  var start = 0; // Debug timer start.
 
   options || (options = {});
   _comments = !!options.comments;
@@ -65,12 +65,12 @@ function parse(css, options) {
  *   already in the token, or that will be added to the token.
  * @returns {Object} AST node
  */
-function astNode(token, override) {
-  override || (override = {});
+function astNode(token: any, overrd?: any): any {
+  let override: any = overrd || {};
 
   var key;
   var keys = ['type', 'name', 'value'];
-  var node = {};
+  var node: any = {};
 
   // Avoiding [].forEach for performance reasons.
   for (var i = 0; i < keys.length; ++i) {
@@ -122,12 +122,12 @@ function next() {
  * @param {Object} token @-group lexical token
  * @returns {Object} @-group AST node
  */
-function parseAtGroup(token) {
+function parseAtGroup(token: any): any {
   _depth = _depth + 1;
 
   // As the @-group token is assembled, relevant token values are captured here
   // temporarily. They will later be used as `tokenize()` overrides.
-  var overrides = {};
+  var overrides: any = {};
 
   switch (token.type) {
   case 'font-face':
@@ -154,7 +154,7 @@ function parseAtGroup(token) {
  * @param {Object} token @import lexical token
  * @returns {Object} @import AST node
  */
-function parseAtImport(token) {
+function parseAtImport(token: any): any {
   return astNode(token);
 }
 
@@ -164,7 +164,7 @@ function parseAtImport(token) {
  * @param {Object} token @charset lexical token
  * @returns {Object} @charset node
  */
-function parseCharset(token) {
+function parseCharset(token: any): any {
   return astNode(token);
 }
 
@@ -174,11 +174,11 @@ function parseCharset(token) {
  * @param {Object} token comment lexical token
  * @returns {Object} comment node
  */
-function parseComment(token) {
+function parseComment(token: any): any {
   return astNode(token, {text: token.text});
 }
 
-function parseNamespace(token) {
+function parseNamespace(token: any): any {
   return astNode(token);
 }
 
@@ -187,7 +187,7 @@ function parseNamespace(token) {
  *
  * @returns {Object} property node
  */
-function parseProperty(token) {
+function parseProperty(token: any): any {
   return astNode(token);
 }
 
@@ -197,15 +197,16 @@ function parseProperty(token) {
  * @param {Object} token selector lexical token
  * @returns {Object} selector node
  */
-function parseSelector(token) {
-  function trim(str) {
+function parseSelector(token: any): any {
+  function trim(str: string) {
     return str.trim();
   }
 
   return astNode(token, {
     type: 'rule',
     selectors: token.text.split(',').map(trim),
-    declarations: parseDeclarations(token)
+    // parseDeclarations(token)
+    declarations: parseDeclarations()
   });
 }
 
@@ -214,7 +215,7 @@ function parseSelector(token) {
  *
  * @returns {Object|undefined} AST node
  */
-function parseToken(token) {
+function parseToken(token: any): any {
   switch (token.type) {
   // Cases are listed in roughly descending order of probability.
   case 'property': return parseProperty(token);
@@ -255,7 +256,7 @@ function parseToken(token) {
  *   @returns {Boolean} `true` if the token should be parsed, `false` otherwise
  * @return {Array} AST nodes
  */
-function parseTokensWhile(conditionFn) {
+function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
   var node;
   var nodes = [];
   var token;
@@ -278,7 +279,7 @@ function parseTokensWhile(conditionFn) {
  *
  * @returns {Array} declaration nodes
  */
-function parseDeclarations() {
+function parseDeclarations(): any {
   return parseTokensWhile(function (token) {
     return (token.type === 'property' || token.type === 'comment');
   });
@@ -289,6 +290,6 @@ function parseDeclarations() {
  *
  * @returns {Array} rule nodes
  */
-function parseRules() {
+function parseRules(): any {
   return parseTokensWhile(function () { return _depth; });
 }

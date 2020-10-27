@@ -1,4 +1,4 @@
-import parse from "./lexer.ts";
+import parse from "./parser.ts";
 
 var ast = parse('p { color: black; }');
 console.log(ast)
