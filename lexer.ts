@@ -2,6 +2,7 @@ var DEBUG = false; // `true` to print debugging info.
 var TIMER = false; // `true` to time calls to `lex()` and print the results.
 
 import dbg from './debug.js'
+import { Token } from "./types.ts";
 
 let debug = dbg('lex');
 
@@ -13,7 +14,7 @@ export default lex;
  * @param {String} css CSS
  * @returns {Array} lexical tokens
  */
-function lex(css: string) {
+function lex(css: string): Token[] {
   var start = 0; // Debug timer start.
 
   var buffer = '';      // Character accumulator
@@ -24,8 +25,8 @@ function lex(css: string) {
   var line = 1;         // Current source line number
   var state = 'before-selector'; // Current state
   var stack = [state];  // State stack
-  var token: any = {};       // Current token
-  var tokens: any[] = [];      // Token accumulator
+  var token: Token = {};       // Current token
+  var tokens: Token[] = [];      // Token accumulator
 
   // Supported @-rules, in roughly descending order of usage probability.
   var atRules: any = [
@@ -201,7 +202,7 @@ function lex(css: string) {
    *
    * @param {String} type Token type.
    */
-  function initializeToken(type: any) {
+  function initializeToken(type: string) {
     token = {
       type: type,
       start: {

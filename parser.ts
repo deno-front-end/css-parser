@@ -1,11 +1,11 @@
 var DEBUG = false; // `true` to print debugging info.
 var TIMER = false; // `true` to time calls to `parse()` and print the results.
 
-
 import dbg from './debug.js'
 let debug = dbg('parse');
 
 import lex from './lexer.ts';
+import { Token, AST } from "./types.ts";
 
 export default parse;
 
@@ -22,7 +22,7 @@ var _tokens: any[];     // Array of lexical tokens.
  * @param {Boolean} [options.comments=false] allow comment nodes in the AST
  * @returns {Object} `stringify`-able AST
  */
-function parse(css: string | any[], options: any) {
+function parse(css: string | any[], options: any): AST {
   var start = 0; // Debug timer start.
 
   options || (options = {});
@@ -65,29 +65,28 @@ function parse(css: string | any[], options: any) {
  *   already in the token, or that will be added to the token.
  * @returns {Object} AST node
  */
-function astNode(token: any, overrd?: any): any {
+function astNode(token: Token, overrd?: any): Token {
   let override: any = overrd || {};
 
-  var key;
-  var keys = ['type', 'name', 'value'];
-  var node: any = {};
+  var node: Token = {};
 
-  // Avoiding [].forEach for performance reasons.
-  for (var i = 0; i < keys.length; ++i) {
-    key = keys[i];
-
-    if (token[key]) {
-      node[key] = override[key] || token[key];
-    }
+  if (token.type) {
+    node.type = override.type || token.type;
+  }
+  if (token.name) {
+    node.name = override.name || token.name;
+  }
+  if (token.type) {
+    node.type = override.type || token.type;
   }
 
-  keys = Object.keys(override);
-
-  for (i = 0; i < keys.length; ++i) {
+  let keys = Object.keys(override);
+  let key;
+  for (let i = 0; i < keys.length; ++i) {
     key = keys[i];
-
-    if (!node[key]) {
-      node[key] = override[key];
+    let n = node as Record<string, any>
+    if (!n[key]) {
+      n[key] = override[key];
     }
   }
 
@@ -122,7 +121,7 @@ function next() {
  * @param {Object} token @-group lexical token
  * @returns {Object} @-group AST node
  */
-function parseAtGroup(token: any): any {
+function parseAtGroup(token: Token): any {
   _depth = _depth + 1;
 
   // As the @-group token is assembled, relevant token values are captured here
