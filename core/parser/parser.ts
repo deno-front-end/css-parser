@@ -2,7 +2,7 @@ import dbg from "../../debug/debug.js";
 const debug = dbg("parse");
 
 import { lex } from "../lexer/lexer.ts";
-import { AST, Token } from "../../ast/mod.ts";
+import type { AST, Token } from "../../ast/mod.ts";
 
 let _comments: boolean; // Whether comments are allowed.
 let _depth: number; // Current block nesting depth.

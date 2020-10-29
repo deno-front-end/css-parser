@@ -1,4 +1,4 @@
-import { Rule } from "./node.ts";
+import type { Rule } from "./node.ts";
 
 type Type = "stylesheet";
 
