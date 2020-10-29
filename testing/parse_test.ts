@@ -1,4 +1,4 @@
-import { parse } from "../core/parser/parser.ts";
+import { parse } from "../mod.ts";
 import { comment } from "./fixtures.js";
 import { assertEquals } from "./deps.ts";
 
