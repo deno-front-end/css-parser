@@ -4,10 +4,10 @@ let debug = dbg("parse");
 import { lex } from "../lexer/lexer.ts";
 import { AST, Token } from "../../ast/mod.ts";
 
-var _comments: boolean; // Whether comments are allowed.
-var _depth: number; // Current block nesting depth.
-var _position: any; // Whether to include line/column position.
-var _tokens: Token[]; // Array of lexical tokens.
+let _comments: boolean; // Whether comments are allowed.
+let _depth: number; // Current block nesting depth.
+let _position: any; // Whether to include line/column position.
+let _tokens: Token[]; // Array of lexical tokens.
 
 /**
  * Convert a CSS string or array of lexical tokens into a `stringify`-able AST.
@@ -18,7 +18,7 @@ var _tokens: Token[]; // Array of lexical tokens.
  * @returns {Object} `stringify`-able AST
  */
 export function parse(css: string | any[], options: any): AST {
-  var start = 0; // Debug timer start.
+  let start = 0; // Debug timer start.
 
   options || (options = {});
   _comments = !!options.comments;
@@ -29,9 +29,9 @@ export function parse(css: string | any[], options: any): AST {
   // Operate on a copy of the given tokens, or the lex()'d CSS string.
   _tokens = Array.isArray(css) ? css.slice() : lex(css);
 
-  var rule;
-  var rules = [];
-  var token;
+  let rule;
+  let rules = [];
+  let token;
 
   start = Date.now();
 
@@ -40,7 +40,7 @@ export function parse(css: string | any[], options: any): AST {
     rule && rules.push(rule);
   }
 
-  debug("ran in", (Date.now() - start) + "ms");
+  debug("ran in", Date.now() - start + "ms");
 
   return {
     type: "stylesheet",
@@ -63,7 +63,7 @@ export function parse(css: string | any[], options: any): AST {
 function astNode(token: Token, overrd?: any): Token {
   let override: any = overrd || {};
 
-  var node: Token = {};
+  let node: Token = {};
 
   if (token.type) {
     node.type = override.type || token.type;
@@ -103,7 +103,7 @@ function astNode(token: Token, overrd?: any): Token {
  * @returns {Object} lexical token
  */
 function next() {
-  var token = _tokens.shift();
+  let token = _tokens.shift();
   debug("next:", JSON.stringify(token, null, 2));
   return token;
 }
@@ -121,7 +121,7 @@ function parseAtGroup(token: Token): any {
 
   // As the @-group token is assembled, relevant token values are captured here
   // temporarily. They will later be used as `tokenize()` overrides.
-  var overrides: any = {};
+  let overrides: any = {};
 
   switch (token.type) {
     case "font-face":
@@ -262,11 +262,11 @@ function parseToken(token: any): any {
  * @return {Array} AST nodes
  */
 function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
-  var node;
-  var nodes = [];
-  var token;
+  let node;
+  let nodes = [];
+  let token;
 
-  while ((token = next()) && (conditionFn && conditionFn(token))) {
+  while ((token = next()) && conditionFn && conditionFn(token)) {
     node = parseToken(token);
     node && nodes.push(node);
   }
@@ -286,7 +286,7 @@ function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
  */
 function parseDeclarations(): any {
   return parseTokensWhile(function (token) {
-    return (token.type === "property" || token.type === "comment");
+    return token.type === "property" || token.type === "comment";
   });
 }
 
