@@ -17,10 +17,9 @@ let _tokens: Token[]; // Array of lexical tokens.
  * @param {Boolean} [options.comments=false] allow comment nodes in the AST
  * @returns {Object} `stringify`-able AST
  */
-export function parse(css: string | any[], options: any): AST {
+export function parse(css: string | any[], options: any = {}): AST {
   let start = 0; // Debug timer start.
 
-  options || (options = {});
   _comments = !!options.comments;
   _position = !!options.position;
 
