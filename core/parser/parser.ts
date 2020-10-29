@@ -1,5 +1,5 @@
 import dbg from "../../debug/debug.js";
-let debug = dbg("parse");
+const debug = dbg("parse");
 
 import { lex } from "../lexer/lexer.ts";
 import { AST, Token } from "../../ast/mod.ts";

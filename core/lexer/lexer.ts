@@ -1,7 +1,7 @@
 import dbg from "../../debug/debug.js";
 import { Token } from "../../ast/mod.ts";
 
-let debug = dbg("lex");
+const debug = dbg("lex");
 
 /**
  * Convert a CSS string into an array of lexical tokens.
@@ -19,12 +19,12 @@ export function lex(css: string): Token[] {
   let depth = 0; // Current nesting depth
   let line = 1; // Current source line number
   let state = "before-selector"; // Current state
-  let stack = [state]; // State stack
+  const stack = [state]; // State stack
   let token: Token = {}; // Current token
-  let tokens: Token[] = []; // Token accumulator
+  const tokens: Token[] = []; // Token accumulator
 
   // Supported @-rules, in roughly descending order of usage probability.
-  let atRules: any = [
+  const atRules: any = [
     "media",
     "keyframes",
     { name: "-webkit-keyframes", type: "keyframes", prefix: "-webkit-" },
@@ -49,7 +49,7 @@ export function lex(css: string): Token[] {
    *
    * @returns {String} The next character.
    */
-  function getCh() {
+  function getCh(): string {
     skip();
     return css[cursor];
   }
