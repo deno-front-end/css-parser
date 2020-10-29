@@ -28,9 +28,9 @@ export function parse(css: string | any[], options: any = {}): AST {
   // Operate on a copy of the given tokens, or the lex()'d CSS string.
   _tokens = Array.isArray(css) ? css.slice() : lex(css);
 
-  let rule;
+  let rule: any;
   let rules = [];
-  let token;
+  let token: any;
 
   start = Date.now();
 
@@ -75,7 +75,7 @@ function astNode(token: Token, overrd?: any): Token {
   }
 
   let keys = Object.keys(override);
-  let key;
+  let key: any;
   for (let i = 0; i < keys.length; ++i) {
     key = keys[i];
     let n = node as Record<string, any>;
@@ -101,7 +101,7 @@ function astNode(token: Token, overrd?: any): Token {
  *
  * @returns {Object} lexical token
  */
-function next() {
+function next(): any {
   let token = _tokens.shift();
   debug("next:", JSON.stringify(token, null, 2));
   return token;
@@ -261,9 +261,9 @@ function parseToken(token: any): any {
  * @return {Array} AST nodes
  */
 function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
-  let node;
+  let node: any;
   let nodes = [];
-  let token;
+  let token: any;
 
   while ((token = next()) && conditionFn && conditionFn(token)) {
     node = parseToken(token);
