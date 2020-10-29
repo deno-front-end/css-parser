@@ -30,7 +30,7 @@ export function parse(css: string | any[], options: any = {}): AST {
 
   let rule: any;
   let rules = [];
-  let token: any;
+  let token: Token;
 
   start = Date.now();
 
