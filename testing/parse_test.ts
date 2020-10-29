@@ -1,6 +1,6 @@
 import { parse } from "../core/parser/parser.ts";
 import { comment } from "./fixtures.js";
-import { assertEquals, assertObjectMatch } from "./deps.ts";
+import { assertEquals } from "./deps.ts";
 
 for (let i = 0; i < comment.length; i++) {
   const node = comment[i];
