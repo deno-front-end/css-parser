@@ -1,7 +1,7 @@
 import dbg from "../../debug/debug.js";
-import { Token } from "../../ast/mod.ts";
+import type { Token } from "../../ast/mod.ts";
 
-let debug = dbg("lex");
+const debug = dbg("lex");
 
 /**
  * Convert a CSS string into an array of lexical tokens.
@@ -10,21 +10,21 @@ let debug = dbg("lex");
  * @returns {Array} lexical tokens
  */
 export function lex(css: string): Token[] {
-  var start = 0; // Debug timer start.
+  let start = 0; // Debug timer start.
 
-  var buffer = ""; // Character accumulator
-  var ch; // Current character
-  var column = 0; // Current source column number
-  var cursor = -1; // Current source cursor position
-  var depth = 0; // Current nesting depth
-  var line = 1; // Current source line number
-  var state = "before-selector"; // Current state
-  var stack = [state]; // State stack
-  var token: Token = {}; // Current token
-  var tokens: Token[] = []; // Token accumulator
+  let buffer = ""; // Character accumulator
+  let ch: string; // Current character
+  let column = 0; // Current source column number
+  let cursor = -1; // Current source cursor position
+  let depth = 0; // Current nesting depth
+  let line = 1; // Current source line number
+  let state = "before-selector"; // Current state
+  const stack = [state]; // State stack
+  let token: Token = {}; // Current token
+  const tokens: Token[] = []; // Token accumulator
 
   // Supported @-rules, in roughly descending order of usage probability.
-  var atRules: any = [
+  const atRules: any = [
     "media",
     "keyframes",
     { name: "-webkit-keyframes", type: "keyframes", prefix: "-webkit-" },
@@ -49,7 +49,7 @@ export function lex(css: string): Token[] {
    *
    * @returns {String} The next character.
    */
-  function getCh() {
+  function getCh(): string {
     skip();
     return css[cursor];
   }
@@ -73,8 +73,8 @@ export function lex(css: string): Token[] {
    * @returns {Boolean} Whether the string was found.
    */
   function isNextString(str: string): boolean {
-    var start = cursor + 1;
-    return (str === css.slice(start, start + str.length));
+    let start = cursor + 1;
+    return str === css.slice(start, start + str.length);
   }
 
   /**
@@ -85,7 +85,7 @@ export function lex(css: string): Token[] {
    * @returns {Number|false} The position, or `false` if not found.
    */
   function find(str: string): number | boolean {
-    var pos = css.slice(cursor).indexOf(str);
+    let pos = css.slice(cursor).indexOf(str);
 
     return pos > 0 ? pos : false;
   }
@@ -117,7 +117,7 @@ export function lex(css: string): Token[] {
    * @returns {String} The removed state.
    */
   function popState(): string | undefined {
-    var removed = stack.pop();
+    let removed = stack.pop();
     state = stack[stack.length - 1];
 
     return removed;
@@ -143,7 +143,7 @@ export function lex(css: string): Token[] {
    * @returns {String} The replaced state.
    */
   function replaceState(newState: string): string {
-    var previousState = state;
+    let previousState = state;
     stack[stack.length - 1] = state = newState;
 
     return previousState;
@@ -165,7 +165,7 @@ export function lex(css: string): Token[] {
       }
       cursor++;
     } else {
-      var skipStr = css.slice(cursor, cursor + (n || 0)).split("\n");
+      let skipStr = css.slice(cursor, cursor + (n || 0)).split("\n");
       if (skipStr.length > 1) {
         line += skipStr.length - 1;
         column = 1;
@@ -221,7 +221,7 @@ export function lex(css: string): Token[] {
 
   start = Date.now();
 
-  while (ch = getCh()) {
+  while ((ch = getCh())) {
     debug(ch, getState());
 
     // column += 1;
@@ -311,7 +311,7 @@ export function lex(css: string): Token[] {
             // Tokenize a declaration
             // if value is empty skip the declaration
             if (buffer.trim().length > 0) {
-              token.value = buffer.trim(), addToken();
+              (token.value = buffer.trim()), addToken();
             }
             replaceState("before-name");
             break;
@@ -524,7 +524,7 @@ export function lex(css: string): Token[] {
             if (isNextChar("*")) {
               // Ignore comments in selectors, properties and values. They are
               // difficult to represent in the AST.
-              var pos = find("*/");
+              let pos = find("*/");
 
               if (pos && typeof pos !== "boolean") {
                 skip(pos + 1);
@@ -596,11 +596,11 @@ export function lex(css: string): Token[] {
 
           default:
             // Iterate over the supported @-rules and attempt to tokenize one.
-            var tokenized = false;
-            var name;
-            var rule;
+            let tokenized = false;
+            let name;
+            let rule;
 
-            for (var j = 0, len = atRules.length; !tokenized && j < len; ++j) {
+            for (let j = 0, len = atRules.length; !tokenized && j < len; ++j) {
               rule = atRules[j];
               name = rule.name || rule;
 
@@ -683,7 +683,7 @@ export function lex(css: string): Token[] {
     }
   }
 
-  debug("ran in", (Date.now() - start) + "ms");
+  debug("ran in", Date.now() - start + "ms");
 
   return tokens;
 }

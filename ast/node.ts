@@ -1,4 +1,4 @@
-import { Position } from "./token.ts";
+import type { Position } from "./token.ts";
 
 export interface Rule {
   type: string;
