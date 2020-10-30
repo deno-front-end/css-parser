@@ -5,7 +5,7 @@ CSS Lexer & Parser implementation for Deno
 
 Parse CSS to AST -
 ```typescript
-import { parse } from "https://deno.land/x/css@0.1.0/mod.ts";
+import { parse } from "https://deno.land/x/css@0.2.0/mod.ts";
 
 let ast = parse("/* comment */ p { color: black; }", {/* OPTIONS */})
 // {
