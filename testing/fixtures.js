@@ -25,6 +25,7 @@ export const comment = [
             {
               name: "color",
               type: "property",
+              value: "black"
             },
           ],
         }],
