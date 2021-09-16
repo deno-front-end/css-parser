@@ -73,6 +73,9 @@ function astNode(token: Token, overrd?: any): Token {
   if (token.type) {
     node.type = override.type || token.type;
   }
+  if (token.value) {
+    node.value = override.value || token.value;
+  }
 
   let keys = Object.keys(override);
   let key: any;
