@@ -2,11 +2,11 @@ import dbg from "../../debug/debug.js";
 const debug = dbg("parse");
 
 import { lex } from "../lexer/lexer.ts";
-import type { AST, Token } from "../../ast/mod.ts";
+import type { AST, Token, Rule, Decl } from "../../ast/mod.ts";
 
 let _comments: boolean; // Whether comments are allowed.
 let _depth: number; // Current block nesting depth.
-let _position: any; // Whether to include line/column position.
+let _position: boolean; // Whether to include line/column position.
 let _tokens: Token[]; // Array of lexical tokens.
 
 /**
@@ -15,9 +15,10 @@ let _tokens: Token[]; // Array of lexical tokens.
  * @param {String} css CSS string or array of lexical token
  * @param {Object} [options]
  * @param {Boolean} [options.comments=false] allow comment nodes in the AST
+ * @param {Boolean} [options.position=false] include position in the AST
  * @returns {Object} `stringify`-able AST
  */
-export function parse(css: string | any[], options: any = {}): AST {
+export function parse(css: string | Token[], options: {comments?: boolean, position?: boolean} = {}): AST {
   let start = 0; // Debug timer start.
 
   _comments = !!options.comments;
@@ -28,14 +29,13 @@ export function parse(css: string | any[], options: any = {}): AST {
   // Operate on a copy of the given tokens, or the lex()'d CSS string.
   _tokens = Array.isArray(css) ? css.slice() : lex(css);
 
-  let rule: any;
-  let rules = [];
-  let token: Token;
+  const rules: Rule[] = [];
+  let token: Token | undefined;
 
   start = Date.now();
 
   while ((token = next())) {
-    rule = parseToken(token);
+    const rule = parseToken(token);
     rule && rules.push(rule);
   }
 
@@ -59,29 +59,26 @@ export function parse(css: string | any[], options: any = {}): AST {
  *   already in the token, or that will be added to the token.
  * @returns {Object} AST node
  */
-function astNode(token: Token, overrd?: any): Token {
-  let override: any = overrd || {};
+function astNode(token: Token, overrd?: Record<string,unknown>): Rule {
+  const override: Record<string,unknown> = overrd ?? {};
 
-  let node: Token = {};
+  const node: any= {};
 
   if (token.type) {
-    node.type = override.type || token.type;
+    node.type = override.type ?? token.type;
   }
   if (token.name) {
-    node.name = override.name || token.name;
-  }
-  if (token.type) {
-    node.type = override.type || token.type;
+    node.name = override.name ?? token.name;
   }
   if (token.value) {
-    node.value = override.value || token.value;
+    node.value = override.value ?? token.value;
   }
 
-  let keys = Object.keys(override);
-  let key: any;
+  const keys = Object.keys(override);
   for (let i = 0; i < keys.length; ++i) {
-    key = keys[i];
-    let n = node as Record<string, any>;
+    const key = keys[i];
+    const n = node as Record<string, unknown>;
+
     if (!n[key]) {
       n[key] = override[key];
     }
@@ -104,8 +101,8 @@ function astNode(token: Token, overrd?: any): Token {
  *
  * @returns {Object} lexical token
  */
-function next(): any {
-  let token = _tokens.shift();
+function next(): Token | undefined {
+  const token = _tokens.shift();
   debug("next:", JSON.stringify(token, null, 2));
   return token;
 }
@@ -150,7 +147,7 @@ function parseAtGroup(token: Token): any {
  * @param {Object} token @import lexical token
  * @returns {Object} @import AST node
  */
-function parseAtImport(token: any): any {
+function parseAtImport(token: Token): any {
   return astNode(token);
 }
 
@@ -160,7 +157,7 @@ function parseAtImport(token: any): any {
  * @param {Object} token @charset lexical token
  * @returns {Object} @charset node
  */
-function parseCharset(token: any): any {
+function parseCharset(token: Token): any {
   return astNode(token);
 }
 
@@ -170,11 +167,11 @@ function parseCharset(token: any): any {
  * @param {Object} token comment lexical token
  * @returns {Object} comment node
  */
-function parseComment(token: any): any {
+function parseComment(token: Token): any {
   return astNode(token, { text: token.text });
 }
 
-function parseNamespace(token: any): any {
+function parseNamespace(token: Token): any {
   return astNode(token);
 }
 
@@ -183,7 +180,7 @@ function parseNamespace(token: any): any {
  *
  * @returns {Object} property node
  */
-function parseProperty(token: any): any {
+function parseProperty(token: Token): any {
   return astNode(token);
 }
 
@@ -193,14 +190,14 @@ function parseProperty(token: any): any {
  * @param {Object} token selector lexical token
  * @returns {Object} selector node
  */
-function parseSelector(token: any): any {
+function parseSelector(token: Token): Rule {
   function trim(str: string) {
     return str.trim();
   }
 
   return astNode(token, {
     type: "rule",
-    selectors: token.text.split(",").map(trim),
+    selectors: token.text!.split(",").map(trim),
     // parseDeclarations(token)
     declarations: parseDeclarations(),
   });
@@ -211,7 +208,7 @@ function parseSelector(token: any): any {
  *
  * @returns {Object|undefined} AST node
  */
-function parseToken(token: any): any {
+function parseToken(token: Token): Rule | null {
   switch (token.type) {
     // Cases are listed in roughly descending order of probability.
     case "property":
@@ -222,7 +219,7 @@ function parseToken(token: any): any {
 
     case "at-group-end":
       _depth = _depth - 1;
-      return;
+      return null;
 
     case "media":
     case "keyframes":
@@ -249,6 +246,8 @@ function parseToken(token: any): any {
   }
 
   debug("parseToken: unexpected token:", JSON.stringify(token));
+
+  return null;
 }
 
 // -- Parse Helper Functions ---------------------------------------------------
@@ -263,13 +262,13 @@ function parseToken(token: any): any {
  *   @returns {Boolean} `true` if the token should be parsed, `false` otherwise
  * @return {Array} AST nodes
  */
-function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
-  let node: any;
-  let nodes = [];
-  let token: any;
+function parseTokensWhile(conditionFn: (token: Token) => boolean | number): Rule[] {
+  const nodes: Rule[] = [];
+  let token: Token | undefined;
 
   while ((token = next()) && conditionFn && conditionFn(token)) {
-    node = parseToken(token);
+    const node = parseToken(token);
+
     node && nodes.push(node);
   }
 
@@ -286,10 +285,10 @@ function parseTokensWhile(conditionFn: (token: any) => boolean | number): any {
  *
  * @returns {Array} declaration nodes
  */
-function parseDeclarations(): any {
+function parseDeclarations(): Decl[] {
   return parseTokensWhile(function (token) {
     return token.type === "property" || token.type === "comment";
-  });
+  }) as Decl[];
 }
 
 /**
@@ -297,7 +296,7 @@ function parseDeclarations(): any {
  *
  * @returns {Array} rule nodes
  */
-function parseRules(): any {
+function parseRules(): Rule[] {
   return parseTokensWhile(function () {
     return _depth;
   });
